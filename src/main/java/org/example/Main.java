@@ -1,8 +1,14 @@
 package org.example;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -13,8 +19,36 @@ public class Main {
         if(!validateArgs(args)){
             return;
         }
-        
+        CSVParser parser= fetchCvs(args[2]);
 
+    }
+
+    public static CSVParser fetchCvs(String url){
+
+        try {
+        HttpClient client = HttpClient.newHttpClient();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(url))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        String content = response.body();
+
+        return CSVFormat.DEFAULT.parse(new StringReader(content));
+
+        }catch (URISyntaxException e) {
+            System.out.println("Invalid URL syntax!");
+        }catch (IOException e) {
+            System.out.println("IO Exception occurred");
+            e.printStackTrace();
+        }catch (InterruptedException e) {
+            System.out.println("Request was interrupted");
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static boolean validateArgs(String[] args){
