@@ -7,9 +7,14 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -20,6 +25,40 @@ public class Main {
             return;
         }
         CSVParser parser= fetchCvs(args[2]);
+        if (parser == null) {
+            System.out.println("Invalid CSV or unable to fetch data.");
+            return;
+        }
+        final double x = Double.parseDouble(args[0]);
+        final double y = Double.parseDouble(args[1]);
+        int resultNumber = 3;
+
+        PriorityQueue<Location> locations = new PriorityQueue<>((a, b)->
+         Double.compare(b.getDistance(), a.getDistance()));
+
+        for (CSVRecord record : parser) {
+                if(!validateRecord(record)){
+                    return;
+                }
+                String name = record.get(0);
+                double recordX = Double.parseDouble(record.get(1));
+                double recordY = Double.parseDouble(record.get(2));
+                Location location = new Location(recordX, recordY, name);
+                location.calcualteDistance(x, y);
+                locations.add(location);
+                if (locations.size() > resultNumber) {
+                    locations.poll();
+                }
+            }
+
+            System.out.println(resultNumber+" closest coffee shops:");
+            List<Location> result = new ArrayList<>(locations);
+            result.sort(Comparator.comparing(Location::getDistance));
+            for (Location loc : result) {
+                System.out.printf("%s -> Latitude: %.4f, Longitude: %.4f, Distance: %.4f%n",
+                        loc.getName(), loc.getY(), loc.getX(), loc.getDistance());
+            }
+
 
     }
 
@@ -68,4 +107,24 @@ public class Main {
         }
         return true;
     } 
+
+    public static boolean validateRecord(CSVRecord record){
+        if (record.size() < 3) {
+            System.out.println("Invalid CSV: missing fields");
+            return false;
+        }
+        String name = record.get(0).trim();
+        if (name.isEmpty()) {
+            System.out.println("Invalid CSV: missing shop name");
+            return false;
+        }
+        try {
+            Double.parseDouble(record.get(1));
+            Double.parseDouble(record.get(2));
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid CSV: non-numeric coordinates for shop " + name);
+            return false;
+        }
+        return true;
+    }
 }
