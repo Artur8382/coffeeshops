@@ -26,6 +26,9 @@ The output should be very simple no UI is required.
 ## Example
 Using the
 https://raw.githubusercontent.com/Agilefreaks/test_oop/master/coffee_shops.csv
+
+java -jar target/coffeeshops-1.0-SNAPSHOT.jar 47.6 -122.4 https://raw.githubusercontent.com/Agilefreaks/test_oop/master/coffee_shops.csv
+
 __Input__
 `47.6 -122.4 coffee_shops.csv`
 __Expected output__
@@ -33,3 +36,4 @@ __Expected output__
 Starbucks Seattle2,0.0645
 Starbucks Seattle,0.0861
 Starbucks SF,10.0793
+
