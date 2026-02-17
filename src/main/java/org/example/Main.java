@@ -33,8 +33,9 @@ public class Main {
         final double y = Double.parseDouble(args[1]);
         int resultNumber = 3;
 
+
         PriorityQueue<Location> locations = new PriorityQueue<>((a, b)->
-         Double.compare(b.getDistance(), a.getDistance()));
+         Double.compare(b.calculateDistance(x, y), a.calculateDistance(x, y)));
 
         for (CSVRecord record : parser) {
                 if(!validateRecord(record)){
@@ -44,7 +45,6 @@ public class Main {
                 double recordX = Double.parseDouble(record.get(1));
                 double recordY = Double.parseDouble(record.get(2));
                 Location location = new Location(recordX, recordY, name);
-                location.calcualteDistance(x, y);
                 locations.add(location);
                 if (locations.size() > resultNumber) {
                     locations.poll();
@@ -53,10 +53,10 @@ public class Main {
 
             System.out.println(resultNumber+" closest coffee shops:");
             List<Location> result = new ArrayList<>(locations);
-            result.sort(Comparator.comparing(Location::getDistance));
+            result.sort(Comparator.comparing(loc -> loc.calculateDistance(x, y)));
             for (Location loc : result) {
                 System.out.printf("%s -> Latitude: %.4f, Longitude: %.4f, Distance: %.4f%n",
-                        loc.getName(), loc.getY(), loc.getX(), loc.getDistance());
+                        loc.getName(), loc.getY(), loc.getX(), loc.calculateDistance(x, y));
             }
 
 
@@ -102,8 +102,10 @@ public class Main {
             new URI(args[2]);
         } catch (NumberFormatException exception) {
             System.out.println("First argument must be a decimal number");
+            return false;
         } catch (URISyntaxException e) {
             System.out.println("Invalid URL syntax!");
+            return false;
         }
         return true;
     } 
